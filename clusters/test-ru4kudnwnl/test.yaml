@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ImportCluster
+metadata:
+  name: test
+  description: Your imported cluster
+spec:
+  git_repository:
+    provider: github
+    credential_name: User-Myothas
+    branch: main
+    repository: Myothas/myothas
+  stacks:
+  - name: mystack
+    addons:
+    - name: argo-rollouts
+      chart_name: argo-rollouts
+      chart_version: 2.40.2
+      repository_url: https://argoproj.github.io/argo-helm
+      namespace: argo-rollouts
+      configuration_type: standalone
+      configuration:
+        from_file: add-ons/argo-rollouts/values.yaml
+  - name: one
+  - name: twi
+    addons:
+    - name: alloy-operator
+      chart_name: alloy-operator
+      chart_version: 0.3.7
+      repository_url: https://grafana.github.io/helm-charts
+      namespace: alloy-operator
+      configuration_type: standalone
+      configuration:
+        from_file: add-ons/alloy-operator/values.yaml

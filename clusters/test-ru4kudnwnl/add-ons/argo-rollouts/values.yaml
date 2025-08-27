@@ -1,0 +1,6 @@
+nameOverride: test
+controller:
+  logging:
+    level: debug
+dashboard:
+  enabled: true
