@@ -27,17 +27,35 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      # generates a snake game from the user's contribution graph,
+      - name: checkout
+        uses: actions/checkout@v4
+
+      # snk's bundled v3 action, checked out so we can run its dist under our
+      # fetch shim. GitHub's GraphQL API answers RESOURCE_LIMITS_EXCEEDED for
+      # this account's contribution calendar, so the stock action always fails;
+      # the shim answers snk's GraphQL query from the public HTML calendar
+      # instead (see scripts/snk-html-fetch-shim.mjs).
+      - name: checkout Platane/snk@v3
+        uses: actions/checkout@v4
+        with:
+          repository: Platane/snk
+          ref: v3
+          path: .snk
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       # light variant uses the default palette, dark variant a custom neon one
       - name: generate github-contribution-grid-snake.svg
-        uses: Platane/snk/svg-only@v3
-        with:
-          github_user_name: ${{ github.repository_owner }}
-          outputs: |
+        env:
+          INPUT_GITHUB_USER_NAME: ${{ github.repository_owner }}
+          INPUT_OUTPUTS: |
             dist/github-contribution-grid-snake.svg
             dist/github-contribution-grid-snake-dark.svg?palette=github-dark&color_snake=#a78bfa&color_dots=#161b22,#1e3a8a,#2563eb,#3b82f6,#93c5fd
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --import ./scripts/snk-html-fetch-shim.mjs .snk/svg-only/dist/index.js
 
       # push the content of <build_dir> to the output branch, served at
       # https://raw.githubusercontent.com/<user>/<repo>/output/<file>
